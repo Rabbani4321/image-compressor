@@ -1,34 +1,74 @@
 # PixelPress — Image Compressor
 
-Dependency-free HTML, CSS, and vanilla JavaScript image compression. Images are decoded, transformed, and encoded locally in your browser.
+Static, browser-only JPG/JPEG, PNG, and WebP batch compressor and image editor.
 
 ## Run locally
 
-Open this project in VS Code and open `index.html` in a current browser, or use VS Code Live Server. No install or build step is required. Add up to 30 JPG, JPEG, PNG, or WebP images (up to 40 MB each), choose settings, and compress. Download results individually or use **Download all as ZIP**.
+Open index.html in a current browser, or use VS Code Live Server. No install or build step is required. Add up to 30 images (40 MB each), choose output format and quality, optionally resize/crop/rotate/flip or set a target size, then compress. Compare the untouched source with the final output. Download files individually or as a ZIP.
 
-## Editing and output
+## Quality and formats
 
-- Optional width/height bounds are in pixels (maximum 12,000 per edge and 80 megapixels). With aspect ratio enabled, supplied bounds fit the image ratio; one dimension is resolved separately for each source image.
-- Crop area uses left/top/width/height percentages of the source. Bounds must remain within the original frame. The crop appears in the source preview and is applied during compression. Reset crop restores the whole image; Reset all edits also clears resize and rotation/flip state.
-- Rotation is in 90 degree steps; horizontal and vertical flips are available.
-- Target size is best effort. The app tries lower quality, then smaller dimensions. It says **Target met** only when the actual encoded Blob size is at or below the requested bytes. Exact sizes cannot be guaranteed.
-- WebP/JPEG can be lossy and change visual details. WebP supports alpha, although lossy encoding may change fine details and transparent edges. JPEG has no alpha and composites transparent pixels over white. PNG is lossless, preserves alpha, ignores quality, and can be larger.
-- ZIP is generated locally in store mode using the ZIP file format directly; no third-party library or network import is needed. It contains successfully encoded outputs only, uses safe unique archive names, and is capped at 128 MB total to limit memory use.
+- Lossy compression is always a trade-off: higher quality usually keeps more visual detail and produces a larger file. The slider uses 0.10–1.00 values; the default is 0.95. Presets are Maximum Quality (0.98), Balanced (0.90), and Smaller File (0.75).
+- JPEG output is lossy and has no transparency; transparent areas are composited over white. WebP supports transparency, but lossy WebP can change details and transparent edges. For PNG sources, the app explicitly warns if a lossy output format is selected.
+- PNG output is lossless, preserves transparency, and ignores quality. It can produce a larger file.
+- The browser's actual encoder MIME type must exactly match the selected output format. Unsupported encoding requests fail visibly rather than silently downloading a different format.
+- Ordinary compression encodes one candidate at the original dimensions. Each target-size candidate is drawn from the original decoded image, never from a prior compressed candidate. Dimensions are reduced only for an explicit resize or target-size request.
+- Comparison keeps the original preview unchanged. Preview images use their natural size up to the preview bounds; small images are not enlarged.
 
-## Privacy and limits
+## Target size and ZIP
 
-No image bytes are uploaded. Per-image inputs above 40 MB and processing outputs above 80 megapixels are rejected. Browser/device canvas or memory limits can be lower. Object URLs are released when items are removed, cleared, or when the page is left.
+Target size is best effort. The app tries lower quality and then smaller dimensions, only in target-size mode. It marks a target met only if the final encoded bytes fit. ZIP creation is local, includes successful outputs only, uses unique names, and is capped at 128 MB.
 
-## Manual testing checklist
+## Privacy and resource handling
 
-- [ ] Check local CSS, JavaScript, and SVG favicon references; navigation, FAQs, and theme switching.
-- [ ] Add several input formats via picker and drag/drop; remove items and clear all.
-- [ ] Adjust quality and output format and read format guidance.
-- [ ] Try width only, height only, bounded resize with aspect ratio, and dimension limits.
-- [ ] Change crop percentages; confirm source preview; compress and verify output; reset crop and reset all edits.
-- [ ] Rotate and flip; confirm output preview and downloaded image orientation.
-- [ ] Request KB and MB targets. Confirm only actual outputs within the byte target say **Target met**, and test an unattainably small target.
-- [ ] Compress multiple images; compare dimensions, sizes, savings/larger state, and output format.
-- [ ] Download individual files and ZIP; verify ZIP opens, includes only successful images, and duplicate source names remain unique.
-- [ ] Try unsupported, empty, corrupt, over-40-MB, and over-80-megapixel files.
-- [ ] Test keyboard use, mobile/tablet layouts, and clear/reset behavior.
+Image data is processed locally in the browser and is not uploaded. Source/result object URLs are released when entries are removed, the queue is cleared, or the page is left.
+
+## Manual test checklist
+
+- [ ] Verify the default slider reads 95% (0.95); presets select 0.98, 0.90, and 0.75; manual slider changes remain visible.
+- [ ] With WebP/JPEG selected, compare output from source at several qualities; PNG output should remain lossless and transparent.
+- [ ] Add a PNG then choose lossy WebP/JPEG and confirm the warning; unsupported browser encoders should show an error.
+- [ ] Confirm ordinary compression preserves dimensions and uses the original source; test target-size mode and confirm only a real byte-size match is called met.
+- [ ] Check original/output dimensions, sizes, savings or percentage larger, and compare previews at desktop/mobile sizes; verify small originals are not enlarged.
+- [ ] Recheck batch add/remove/retry, crop/reset, resize/aspect ratio, rotate, flips, individual downloads, ZIP integrity and unique names.
+- [ ] Try corrupt, unsupported, oversized, and over-80-megapixel files.
+- [ ] Use `node --check script.js` after script changes.
+
+
+## Enhance Photo
+
+The separate **Enhance Photo** panel applies browser-side brightness, contrast, saturation, and a restrained unsharp-mask sharpness adjustment. It previews each adjustment from the selected original image and renders the download at the original pixel dimensions; it does not replace or modify the source file or the compressor's output. The two previews use the same fitted display bounds and retain the source aspect ratio.
+
+These appearance adjustments can make a photo look brighter, punchier, or crisper, but they cannot recover details that were absent or lost in the source. Sharpening can also make noise and halos more visible. There is no noise-reduction filter or AI model connected. No image is sent to an external service. For future AI integration, a model/API would need an explicit, separate consent step and clear disclosure before any image leaves the browser.
+
+Enhanced downloads use the currently selected output format and quality setting. PNG export preserves transparency; JPEG flattens transparent areas to white and is lossy; WebP supports alpha but may be lossy. Format support depends on the browser and unsupported output formats produce an error. Enhancement previews are scaled for speed; the downloaded image is processed full size, subject to the existing 80-megapixel safety limit and device memory. Full-resolution sharpening is limited to 12 megapixels because it requires extra memory.
+
+## Manual enhancement checks
+
+- Add a photo, open **Enhance Photo**, and move each of the four controls; confirm both previews have the same framing and only the enhanced preview changes.
+- Use **Reset enhancements** and verify values return to their defaults and the enhanced preview matches the source.
+- Download an enhanced image and check it opens, has the source pixel dimensions, and uses the selected format.
+- Try a transparent PNG with PNG output and verify alpha is retained; select JPEG and verify transparent regions become white.
+- Compare the source and downloaded file to verify the original queue image and compression result remain unchanged.
+- Remove the selected image or use Reset; confirm the selector and previews clear without console errors.
+- Test with a corrupt image and a large image; confirm a readable error appears and processing remains usable.
+- Test the controls with keyboard navigation and at a narrow mobile viewport.
+
+No live browser session was run as part of this update. Run this checklist in the target browsers before release.
+
+
+## Auto Fix Photo Position
+
+The **Auto Fix Photo Position** panel provides a local, reversible manual straighten control. A standard browser image decoder handles orientation metadata embedded in a photo, but browsers do not provide a reliable built-in detector for arbitrary scene tilt. This feature therefore does not guess or silently rotate photos: choose an angle using the slider, review the original and full-frame rotated preview, then accept or undo it. The corrected download is rendered once from the original at a bounding size large enough to retain the complete rotated image; it does not crop corners or change the queued source or compression result.
+
+This is a geometric rotation aid, not automatic face detection, pose correction, or AI. Reliable automatic detection would require a tested local computer-vision model or a separately consented external service. No image is uploaded by this feature. As with any re-encoding, lossy JPEG/WebP output can affect image quality; PNG output preserves transparency.
+
+### Manual position-correction checks
+
+- Choose a photo and adjust the angle; verify the preview updates locally and shows the entire rotated frame.
+- Accept a non-zero angle and verify the corrected download uses the chosen format and contains uncropped corners.
+- Undo the correction; verify the angle returns to zero and no corrected download is available.
+- Confirm the original preview, compression output, and other queued images remain unchanged.
+- Try a transparent PNG with PNG output and JPEG output; check transparency behavior and read any export errors.
+- Select another queued image, remove the selected image, and clear the queue; verify previews and controls stay synchronized and temporary URLs are cleaned up.
+- Test on mobile and desktop using keyboard controls. No automatic tilt, face, or pose detection should be claimed.
