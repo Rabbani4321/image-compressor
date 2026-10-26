@@ -1,41 +1,16 @@
-# Static hosting notes
+# Existing GitHub Pages site
 
-This project is a static QR Code Generator for GitHub Pages or another static host. It needs no backend, build step, API key, or runtime CDN connection.
+This repository contains two independent static tools. Keep the existing repository and its GitHub Pages publishing source unchanged. The original deployment guide targeted the `main` branch and repository root; no build step or backend is needed.
 
-## Keep the Pages setup
+## Published paths
 
-This update changes the site assets and user-facing content only; it does not add, remove, or modify GitHub Actions workflows, branch configuration, or repository settings. Keep the existing Pages source and branch configuration as it is.
+- Image Compressor: `/image-compressor/` (repository root)
+- QR Code Generator: `/image-compressor/qr-code-generator/`
 
-At the published root, serve these files together with exact letter casing:
+The compressor's `index.html`, `style.css`, `script.js`, and `favicon.svg` remain at the root. The QR tool has its own `index.html`, `style.css`, `script.js`, `favicon.svg`, `qrcode-generator.min.js`, and license in `qr-code-generator/`. The QR page uses relative asset references, so it resolves correctly at the nested Pages path. Keep each tool's assets in its own directory.
 
-- `index.html`
-- `style.css`
-- `script.js`
-- `favicon.svg`
-- `qrcode-generator.min.js`
-- `QR-LIBRARY-LICENSE.txt`
+## Local checks
 
-`script.js` loads the QR library using a relative path, so it works for a project site hosted below a repository path. Do not move the library into another directory unless you also update the relative script reference in `index.html`.
+Open the repository root `index.html` or serve the repository root with VS Code Live Server. The QR tool is at `/qr-code-generator/` relative to that root. Test the root compressor and nested QR page separately, including generated downloads, before relying on the hosted copy.
 
-## Blogger embed (optional)
-
-Once the Pages URL is already configured, add the following to a Blogger Page in HTML view. Replace the example URL with your actual HTTPS Pages URL:
-
-```html
-<div style="width:100%; min-height:900px;">
-  <iframe
-    src="https://USERNAME.github.io/REPOSITORY/"
-    title="PixelPress QR Code Generator"
-    loading="lazy"
-    referrerpolicy="strict-origin-when-cross-origin"
-    sandbox="allow-scripts allow-same-origin allow-forms allow-downloads"
-    style="display:block; width:100%; height:1000px; border:0; border-radius:12px;"
-  ></iframe>
-</div>
-```
-
-Keep the iframe title, HTTPS URL, and download permission. Adjust height to your Blogger theme to reduce nested scrolling. Test that generated PNG downloads work from the embed because host policies can differ.
-
-## Privacy and hosting behavior
-
-All QR data generation and PNG rendering run in the browser using the local vendored library. The host serves the static page and library but receives no QR form values through application requests. The generated code is static and contains the entered value directly.
+No deployment settings were changed by this layout update. Existing Pages settings are controlled in repository settings; preserve the current branch/folder source. Do not add new tools' assets to the root if they can be kept in their own folder.

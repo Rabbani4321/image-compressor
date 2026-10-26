@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Create QR codes for links, text, WhatsApp, Wi-Fi, email, and phone numbers. Generate and download PNGs privately in your browser.">
+  <meta name="theme-color" content="#f4f6fb">
+  <title>PixelPress QR — Free QR Code Generator</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script src="qrcode-generator.min.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="PixelPress QR home"><span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M4 4h10v10H4zM18 4h10v10H18zM4 18h10v10H4zM18 18h4v4h-4zM24 18h4v4h-4zM18 24h4v4h-4zM24 24h4v4h-4z"/></svg></span><span>pixelpress<span class="brand-accent"> QR</span></span></a>
+    <nav aria-label="Main navigation"><a href="#how">How it works</a><a href="#types">QR types</a><a href="#faq">FAQ</a></nav>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark theme" title="Switch theme"><span aria-hidden="true">◐</span></button>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <span class="eyebrow"><span class="status-dot"></span> PRIVATE BY DESIGN</span>
+      <h1>Make a connection.<br><span>One scan away.</span></h1>
+      <p>Create a QR code for a link, message, Wi-Fi network, or more.<br class="desktop-break"> Your information stays in this browser.</p>
+      <a class="hero-link" href="#generator">Create your QR code <span aria-hidden="true">↓</span></a>
+      <div class="hero-art" aria-hidden="true"><div class="art-grid"></div><div class="art-card"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
+    </section>
+
+    <section class="generator panel" id="generator" aria-labelledby="generatorTitle">
+      <div class="section-heading"><div><span class="eyebrow">YOUR QR WORKSPACE</span><h2 id="generatorTitle">QR Code Generator</h2><p>Choose what your code should do, then generate and download it.</p></div><span class="local-badge"><span aria-hidden="true">●</span> Generated locally</span></div>
+      <div class="generator-grid">
+        <form id="qrForm" novalidate>
+          <div class="field">
+            <label for="qrType">QR code type</label>
+            <select id="qrType" name="qrType">
+              <option value="website">Website URL</option><option value="text">Plain text</option><option value="whatsapp">WhatsApp</option><option value="wifi">Wi-Fi network</option><option value="email">Email</option><option value="phone">Phone number</option>
+            </select>
+          </div>
+
+          <div class="type-fields" data-fields="website">
+            <div class="field"><label for="websiteUrl">Website URL</label><input id="websiteUrl" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com"><small>Enter a complete http:// or https:// address.</small></div>
+          </div>
+          <div class="type-fields" data-fields="text" hidden>
+            <div class="field"><label for="plainText">Text to encode</label><textarea id="plainText" rows="5" maxlength="2500" placeholder="Write a note, message, or other text"></textarea><small>A shorter message creates a simpler QR pattern.</small></div>
+          </div>
+          <div class="type-fields" data-fields="whatsapp" hidden>
+            <div class="field"><label for="whatsappPhone">WhatsApp number</label><input id="whatsappPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+1 555 123 4567"><small>Include the country code. Spaces and punctuation are removed.</small></div>
+            <div class="field"><label for="whatsappMessage">Optional message</label><textarea id="whatsappMessage" rows="3" maxlength="500" placeholder="Hello!"></textarea></div>
+          </div>
+          <div class="type-fields" data-fields="wifi" hidden>
+            <div class="field"><label for="wifiName">Network name (SSID)</label><input id="wifiName" type="text" autocomplete="off" maxlength="100" placeholder="Your Wi-Fi network"></div>
+            <div class="field"><label for="wifiSecurity">Security</label><select id="wifiSecurity"><option value="WPA">WPA / WPA2 / WPA3</option><option value="WEP">WEP (legacy)</option><option value="nopass">No password</option></select></div>
+            <div class="field" id="wifiPasswordField"><label for="wifiPassword">Wi-Fi password</label><input id="wifiPassword" type="password" autocomplete="new-password" maxlength="64" placeholder="Enter network password"><small>The password is encoded into the QR pattern on this device.</small></div>
+            <label class="check-row"><input id="wifiHidden" type="checkbox"><span>This is a hidden network</span></label>
+          </div>
+          <div class="type-fields" data-fields="email" hidden>
+            <div class="field"><label for="emailAddress">Email address</label><input id="emailAddress" type="email" autocomplete="email" placeholder="name@example.com"></div>
+            <div class="field"><label for="emailSubject">Subject <span class="optional">optional</span></label><input id="emailSubject" type="text" maxlength="120" placeholder="Subject"></div>
+            <div class="field"><label for="emailBody">Message <span class="optional">optional</span></label><textarea id="emailBody" rows="3" maxlength="500" placeholder="Write a message"></textarea></div>
+          </div>
+          <div class="type-fields" data-fields="phone" hidden>
+            <div class="field"><label for="phoneNumber">Phone number</label><input id="phoneNumber" type="tel" inputmode="tel" autocomplete="tel" placeholder="+1 555 123 4567"><small>Include the country code for reliable dialing.</small></div>
+          </div>
+
+          <div class="field size-field"><label for="qrSize">PNG image size</label><select id="qrSize"><option value="256">256 × 256 px</option><option value="384" selected>384 × 384 px</option><option value="512">512 × 512 px</option><option value="768">768 × 768 px</option><option value="1024">1024 × 1024 px</option></select></div>
+          <div class="form-actions"><button class="button primary" id="generateButton" type="submit"><span aria-hidden="true">✳</span> Generate QR code</button><button class="button secondary" id="clearButton" type="button">Clear</button></div>
+          <p class="privacy-note"><span aria-hidden="true">⌑</span> Inputs are encoded in your browser. They are never sent to a server.</p>
+          <div class="error-message" id="errorMessage" role="alert" hidden></div>
+        </form>
+
+        <section class="preview-card" aria-labelledby="previewTitle">
+          <div class="preview-heading"><div><span class="eyebrow">LIVE PREVIEW</span><h3 id="previewTitle">Your QR code</h3></div><span class="preview-status" id="previewStatus" aria-live="polite">Waiting for details</span></div>
+          <div class="qr-stage" id="qrStage"><div class="empty-state" id="emptyState"><div class="empty-symbol" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><strong>Your code will appear here</strong><span>Choose a type and add the details to get started.</span></div><canvas id="qrCanvas" width="384" height="384" role="img" aria-label="Generated QR code" hidden></canvas></div>
+          <p class="preview-caption" id="previewCaption">Generated codes can be scanned with a phone camera or QR scanner.</p>
+          <button class="button download-button" id="downloadButton" type="button" disabled><span aria-hidden="true">↓</span> Download PNG</button>
+        </section>
+      </div>
+    </section>
+
+    <section class="content-section" id="how">
+      <div class="section-heading centered"><span class="eyebrow">A FEW SIMPLE STEPS</span><h2>From idea to scan</h2><p>Create a useful QR code without sending your information anywhere.</p></div>
+      <div class="steps-grid"><article class="info-card"><span class="step-number">01</span><h3>Choose a type</h3><p>Select a website, text, WhatsApp, Wi-Fi, email, or phone code.</p></article><article class="info-card"><span class="step-number">02</span><h3>Enter your details</h3><p>Add the information you want a phone to open or display after scanning.</p></article><article class="info-card"><span class="step-number">03</span><h3>Generate and save</h3><p>Preview your code and download a crisp PNG image to use or share.</p></article></div>
+    </section>
+
+    <section class="content-section type-section" id="types">
+      <div class="section-heading centered"><span class="eyebrow">ONE TOOL, SIX USES</span><h2>What can you encode?</h2></div>
+      <div class="type-grid"><article><span aria-hidden="true">↗</span><div><h3>Website</h3><p>Open a page or online resource.</p></div></article><article><span aria-hidden="true">Aa</span><div><h3>Plain text</h3><p>Show a note or short message.</p></div></article><article><span aria-hidden="true">◉</span><div><h3>WhatsApp</h3><p>Open a chat with an optional message.</p></div></article><article><span aria-hidden="true">⌁</span><div><h3>Wi-Fi</h3><p>Share network access details.</p></div></article><article><span aria-hidden="true">✉</span><div><h3>Email</h3><p>Prepare a new email draft.</p></div></article><article><span aria-hidden="true">☎</span><div><h3>Phone</h3><p>Open the dialer with a number.</p></div></article></div>
+    </section>
+
+    <section class="content-section faq-section" id="faq">
+      <div class="section-heading centered"><span class="eyebrow">HELPFUL DETAILS</span><h2>Frequently asked questions</h2></div>
+      <details><summary>Are my details uploaded?</summary><p>No. QR generation runs in JavaScript on this page. Website links, messages, Wi-Fi names and passwords, email addresses, and phone numbers are not sent to a server or stored by the tool.</p></details>
+      <details><summary>What happens when someone scans my QR code?</summary><p>The scanner interprets the encoded content. A website code opens a link, Wi-Fi codes may offer to join a network, and contact codes can prepare an email or phone action. The scanner may ask the person to confirm.</p></details>
+      <details><summary>Can I encode a long message?</summary><p>QR codes have a finite data capacity. If the content is too long for a valid code, the generator will show an error; shortening the text usually helps.</p></details>
+      <details><summary>What is included in a Wi-Fi QR code?</summary><p>The code contains the network name, security type, and (for secured networks) the password you enter. Anyone who can scan or photograph that code may be able to read those connection details. Share it thoughtfully.</p></details>
+      <details><summary>Does this create a dynamic or trackable QR code?</summary><p>No. This creates a static QR code that directly contains the data you entered. It does not include click tracking or a redirect service.</p></details>
+    </section>
+
+    <aside class="privacy-banner"><span aria-hidden="true">◈</span><p><strong>Your information stays on your device.</strong> The QR pattern is generated in this page and downloaded directly from your browser.</p></aside>
+  </main>
+
+  <footer><a class="brand" href="#home"><span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M4 4h10v10H4zM18 4h10v10H18zM4 18h10v10H4zM18 18h4v4h-4zM24 18h4v4h-4zM18 24h4v4h-4zM24 24h4v4h-4z"/></svg></span><span>pixelpress<span class="brand-accent"> QR</span></span></a><span>Private QR tools, right in your browser.</span><a href="#faq">Privacy and FAQs</a></footer>
+</body>
+</html>
