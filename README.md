@@ -1,74 +1,54 @@
-# PixelPress — Image Compressor
+# PixelPress QR
 
-Static, browser-only JPG/JPEG, PNG, and WebP batch compressor and image editor.
+A responsive, static QR Code Generator for website URLs, plain text, WhatsApp chats, Wi-Fi networks, email drafts, and phone numbers. QR codes are created in the browser. Form values—including Wi-Fi passwords—are not sent to a server or stored by the tool.
 
 ## Run locally
 
-Open index.html in a current browser, or use VS Code Live Server. No install or build step is required. Add up to 30 images (40 MB each), choose output format and quality, optionally resize/crop/rotate/flip or set a target size, then compress. Compare the untouched source with the final output. Download files individually or as a ZIP.
+1. Keep these files together in the same project folder: `index.html`, `style.css`, `script.js`, `favicon.svg`, `qrcode-generator.min.js`, and `QR-LIBRARY-LICENSE.txt`.
+2. Open `index.html` in a current browser, or open the folder in VS Code and use the Live Server extension.
+3. Select a QR type, enter its details, choose the PNG pixel size, and select **Generate QR code**.
+4. Scan the preview with a phone camera if available, then select **Download PNG**.
 
-## Quality and formats
+No build step, backend, API key, account, or runtime CDN connection is required. The QR encoder is bundled locally so Pages can serve it from a project subpath and the page also works offline after its files are available.
 
-- Lossy compression is always a trade-off: higher quality usually keeps more visual detail and produces a larger file. The slider uses 0.10–1.00 values; the default is 0.95. Presets are Maximum Quality (0.98), Balanced (0.90), and Smaller File (0.75).
-- JPEG output is lossy and has no transparency; transparent areas are composited over white. WebP supports transparency, but lossy WebP can change details and transparent edges. For PNG sources, the app explicitly warns if a lossy output format is selected.
-- PNG output is lossless, preserves transparency, and ignores quality. It can produce a larger file.
-- The browser's actual encoder MIME type must exactly match the selected output format. Unsupported encoding requests fail visibly rather than silently downloading a different format.
-- Ordinary compression encodes one candidate at the original dimensions. Each target-size candidate is drawn from the original decoded image, never from a prior compressed candidate. Dimensions are reduced only for an explicit resize or target-size request.
-- Comparison keeps the original preview unchanged. Preview images use their natural size up to the preview bounds; small images are not enlarged.
+## QR formats and validation
 
-## Target size and ZIP
+- **Website:** only `http://` and `https://` URLs are accepted.
+- **Plain text:** accepts a non-empty message. QR capacity is limited; exceptionally long content shows an error instead of producing a code.
+- **WhatsApp:** enter a phone number with country code. The QR contains a `wa.me` link, with an optional URL-encoded message.
+- **Wi-Fi:** creates the standard `WIFI:` payload with SSID, security mode, optional password, and hidden-network flag. WPA password length is validated; WEP is included for legacy compatibility. A Wi-Fi QR contains its password and should be shared carefully.
+- **Email:** validates an email address and encodes an optional subject/body into a `mailto:` link.
+- **Phone:** validates and encodes a number as a `tel:` link.
+- The output size control changes the PNG dimensions (256–1024 px). The code uses QR error-correction level M and keeps the required quiet-zone border. Generated codes are static and do not provide redirects, analytics, or scan tracking.
+- Clear removes the generated preview and entered form values. Editing data after generation invalidates the old preview so it cannot be mistaken for a current code.
 
-Target size is best effort. The app tries lower quality and then smaller dimensions, only in target-size mode. It marks a target met only if the final encoded bytes fit. ZIP creation is local, includes successful outputs only, uses unique names, and is capped at 128 MB.
+## Privacy
 
-## Privacy and resource handling
+The bundled QR library builds the matrix in JavaScript on the current device. The canvas preview and PNG download are produced locally. This page does not upload values, call a QR API, use analytics, or write entered details to local storage. The optional theme preference is the only value stored locally.
 
-Image data is processed locally in the browser and is not uploaded. Source/result object URLs are released when entries are removed, the queue is cleared, or the page is left.
+Avoid sharing a Wi-Fi QR publicly unless you intend its connection details to be available to people who can scan or photograph it.
+
+## Library
+
+The project vendors `qrcode-generator` version 2.0.4 by Kazuhiko Arase, an MIT-licensed JavaScript QR encoder. See `QR-LIBRARY-LICENSE.txt`. The vendored browser build is `qrcode-generator.min.js`; the application code uses its QR matrix API and draws a PNG canvas locally.
 
 ## Manual test checklist
 
-- [ ] Verify the default slider reads 95% (0.95); presets select 0.98, 0.90, and 0.75; manual slider changes remain visible.
-- [ ] With WebP/JPEG selected, compare output from source at several qualities; PNG output should remain lossless and transparent.
-- [ ] Add a PNG then choose lossy WebP/JPEG and confirm the warning; unsupported browser encoders should show an error.
-- [ ] Confirm ordinary compression preserves dimensions and uses the original source; test target-size mode and confirm only a real byte-size match is called met.
-- [ ] Check original/output dimensions, sizes, savings or percentage larger, and compare previews at desktop/mobile sizes; verify small originals are not enlarged.
-- [ ] Recheck batch add/remove/retry, crop/reset, resize/aspect ratio, rotate, flips, individual downloads, ZIP integrity and unique names.
-- [ ] Try corrupt, unsupported, oversized, and over-80-megapixel files.
-- [ ] Use `node --check script.js` after script changes.
+- [ ] Generate a website code with an HTTPS URL; reject blank input, malformed URLs, and non-HTTP protocols.
+- [ ] Generate a plain-text code, including punctuation and non-ASCII characters; reject blank text and verify very long content gets a useful capacity error.
+- [ ] Generate a WhatsApp code with a country code and optional message; reject malformed/too-short numbers.
+- [ ] Generate secured and open Wi-Fi codes; test a hidden network, escaped SSID/password characters, missing names, and invalid WPA password lengths.
+- [ ] Generate an email code with and without optional subject/body; reject invalid email addresses.
+- [ ] Generate phone codes with country code and punctuation; reject malformed numbers.
+- [ ] Change PNG size after generation and verify the preview dimensions update. Download PNG and confirm it opens and is the selected pixel size.
+- [ ] Edit a value after generating; verify the old code is cleared. Use **Clear**; verify inputs, errors, and preview reset.
+- [ ] Toggle light/dark themes and use keyboard-only navigation through every field and action.
+- [ ] At narrow mobile width and tablet/desktop widths, verify the form and preview stack cleanly without horizontal scrolling.
+- [ ] Disconnect from the network after opening the page and confirm generation still works with the local library.
+
+Run the JavaScript syntax check with `node --check script.js`. A live browser session is needed to confirm visual/mobile behavior on your target browsers.
 
 
-## Enhance Photo
+## Automated local verification performed
 
-The separate **Enhance Photo** panel applies browser-side brightness, contrast, saturation, and a restrained unsharp-mask sharpness adjustment. It previews each adjustment from the selected original image and renders the download at the original pixel dimensions; it does not replace or modify the source file or the compressor's output. The two previews use the same fitted display bounds and retain the source aspect ratio.
-
-These appearance adjustments can make a photo look brighter, punchier, or crisper, but they cannot recover details that were absent or lost in the source. Sharpening can also make noise and halos more visible. There is no noise-reduction filter or AI model connected. No image is sent to an external service. For future AI integration, a model/API would need an explicit, separate consent step and clear disclosure before any image leaves the browser.
-
-Enhanced downloads use the currently selected output format and quality setting. PNG export preserves transparency; JPEG flattens transparent areas to white and is lossy; WebP supports alpha but may be lossy. Format support depends on the browser and unsupported output formats produce an error. Enhancement previews are scaled for speed; the downloaded image is processed full size, subject to the existing 80-megapixel safety limit and device memory. Full-resolution sharpening is limited to 12 megapixels because it requires extra memory.
-
-## Manual enhancement checks
-
-- Add a photo, open **Enhance Photo**, and move each of the four controls; confirm both previews have the same framing and only the enhanced preview changes.
-- Use **Reset enhancements** and verify values return to their defaults and the enhanced preview matches the source.
-- Download an enhanced image and check it opens, has the source pixel dimensions, and uses the selected format.
-- Try a transparent PNG with PNG output and verify alpha is retained; select JPEG and verify transparent regions become white.
-- Compare the source and downloaded file to verify the original queue image and compression result remain unchanged.
-- Remove the selected image or use Reset; confirm the selector and previews clear without console errors.
-- Test with a corrupt image and a large image; confirm a readable error appears and processing remains usable.
-- Test the controls with keyboard navigation and at a narrow mobile viewport.
-
-No live browser session was run as part of this update. Run this checklist in the target browsers before release.
-
-
-## Auto Fix Photo Position
-
-The **Auto Fix Photo Position** panel provides a local, reversible manual straighten control. A standard browser image decoder handles orientation metadata embedded in a photo, but browsers do not provide a reliable built-in detector for arbitrary scene tilt. This feature therefore does not guess or silently rotate photos: choose an angle using the slider, review the original and full-frame rotated preview, then accept or undo it. The corrected download is rendered once from the original at a bounding size large enough to retain the complete rotated image; it does not crop corners or change the queued source or compression result.
-
-This is a geometric rotation aid, not automatic face detection, pose correction, or AI. Reliable automatic detection would require a tested local computer-vision model or a separately consented external service. No image is uploaded by this feature. As with any re-encoding, lossy JPEG/WebP output can affect image quality; PNG output preserves transparency.
-
-### Manual position-correction checks
-
-- Choose a photo and adjust the angle; verify the preview updates locally and shows the entire rotated frame.
-- Accept a non-zero angle and verify the corrected download uses the chosen format and contains uncropped corners.
-- Undo the correction; verify the angle returns to zero and no corrected download is available.
-- Confirm the original preview, compression output, and other queued images remain unchanged.
-- Try a transparent PNG with PNG output and JPEG output; check transparency behavior and read any export errors.
-- Select another queued image, remove the selected image, and clear the queue; verify previews and controls stay synchronized and temporary URLs are cleaned up.
-- Test on mobile and desktop using keyboard controls. No automatic tilt, face, or pose detection should be claimed.
+A temporary headless Chrome run verified successful generation and expected payloads for Website, Plain text, WhatsApp, secured Wi-Fi, open Wi-Fi, Email, and Phone. It rejected invalid URLs, blank text, malformed numbers, invalid WPA passwords, invalid email addresses, and over-capacity text. It also checked a 512 × 512 PNG download signature/dimensions, Clear behavior, and responsive layout without horizontal overflow at 390 px mobile and 768 px tablet widths. The temporary harness and browser download were removed after the run.
